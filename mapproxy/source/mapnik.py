@@ -17,6 +17,7 @@ from __future__ import with_statement, absolute_import
 
 import sys
 import time
+import os
 from cStringIO import StringIO
 
 from mapproxy.grid import tile_grid
@@ -44,16 +45,26 @@ except ImportError:
 import logging
 log = logging.getLogger(__name__)
 
+valid_extensions = ['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']
+
 class MapnikSource(MapLayer):
     supports_meta_tiles = True
     mapnik = mapnik
-    def __init__(self, mapfile, layers=None, image_opts=None, coverage=None, res_range=None, lock=None):
+
+    def __init__(self, mapfile, layers=None, image_opts=None, coverage=None, res_range=None, lock=None, fonts_dir=None):
+        log.error(image_opts)
         MapLayer.__init__(self, image_opts=image_opts)
         self.mapfile = mapfile
         self.coverage = coverage
         self.res_range = res_range
         self.layers = set(layers) if layers else None
         self.lock = lock
+        self.fonts_dir = fonts_dir
+        self.added = []
+        self.failed = []
+
+        if self.fonts_dir:
+          self.add_fonts([self.fonts_dir])
         if self.coverage:
             self.extent = MapExtent(self.coverage.bbox, self.coverage.srs)
         else:
@@ -121,6 +132,25 @@ class MapnikSource(MapLayer):
         return ImageSource(StringIO(data), size=query.size,
             image_opts=ImageOptions(transparent=self.transparent, format=query.format))
 
+    def add_fonts(self,fonts):
+        engine = mapnik.FontEngine.instance()
+        for font in fonts:
+            if os.path.isdir(font):
+                found = False;
+                log.error(font)
+                for dirpath, _, filenames in os.walk(font):
+                    for filename in filenames:
+                        if os.path.splitext(filename)[1] in valid_extensions:
+                            font_name = os.path.join(dirpath, filename)
+                            if engine.register_font(font_name):
+                                self.added.append(font_name)
+                            else:
+                                self.failed.append(font_name)
+            else:
+                if engine.register_font(font):
+                    self.added.append(font)
+                else:
+                    self.failed.append(font)
 
 class Mapnik2Source(MapnikSource):
     mapnik = mapnik2

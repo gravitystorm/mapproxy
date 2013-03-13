@@ -348,6 +348,7 @@ mapproxy_yaml_spec = {
                 'transparent': bool(),
                 'image': image_opts,
                 'layers': one_of(str(), [str()]),
+                'fonts_dir': str(),
                 'use_mapnik2': bool(),
             }),
             'debug': {
