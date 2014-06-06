@@ -794,6 +794,8 @@ class MapnikSourceConfiguration(SourceConfiguration):
 
         fonts_dir = self.conf.get('fonts_dir', None)
 
+        scale_factor = self.conf.get('scale_factor', 1)
+
         if self.conf.get('use_mapnik2', False):
             from mapproxy.source.mapnik import Mapnik2Source as MapnikSource, mapnik2 as mapnik_api
         else:
@@ -801,7 +803,7 @@ class MapnikSourceConfiguration(SourceConfiguration):
         if mapnik_api is None:
             raise ConfigurationError('Could not import Mapnik, please verify it is installed!')
         return MapnikSource(mapfile, layers=layers, image_opts=image_opts,
-            coverage=coverage, res_range=res_range, lock=lock, fonts_dir=fonts_dir)
+            coverage=coverage, res_range=res_range, lock=lock, fonts_dir=fonts_dir, scale_factor=scale_factor)
 
 class TileSourceConfiguration(SourceConfiguration):
     supports_meta_tiles = False

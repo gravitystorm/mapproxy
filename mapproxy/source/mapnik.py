@@ -51,7 +51,7 @@ class MapnikSource(MapLayer):
     supports_meta_tiles = True
     mapnik = mapnik
 
-    def __init__(self, mapfile, layers=None, image_opts=None, coverage=None, res_range=None, lock=None, fonts_dir=None):
+    def __init__(self, mapfile, layers=None, image_opts=None, coverage=None, res_range=None, lock=None, fonts_dir=None, scale_factor=1):
         log.error(image_opts)
         MapLayer.__init__(self, image_opts=image_opts)
         self.mapfile = mapfile
@@ -62,6 +62,7 @@ class MapnikSource(MapLayer):
         self.fonts_dir = fonts_dir
         self.added = []
         self.failed = []
+        self.scale_factor = scale_factor
 
         if self.fonts_dir:
           self.add_fonts([self.fonts_dir])
@@ -120,7 +121,7 @@ class MapnikSource(MapLayer):
                         i += 1
 
             img = self.mapnik.Image(query.size[0], query.size[1])
-            self.mapnik.render(m, img)
+            self.mapnik.render(m, img, self.scale_factor)
             data = img.tostring(str(query.format))
         finally:
             size = None

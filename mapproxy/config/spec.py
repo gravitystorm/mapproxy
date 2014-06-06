@@ -349,6 +349,7 @@ mapproxy_yaml_spec = {
                 'image': image_opts,
                 'layers': one_of(str(), [str()]),
                 'fonts_dir': str(),
+                'scale_factor' :number(),
                 'use_mapnik2': bool(),
             }),
             'debug': {
